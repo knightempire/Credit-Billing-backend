@@ -4,7 +4,8 @@ from flask import jsonify, current_app
 from models import User
 from datetime import datetime, timedelta
 import bcrypt
-from middeware.mail import send_register_email, send_forgot_email
+from middleware.mail import send_register_email, send_forgot_email
+
 
 # Get the mongo instance from the app
 def get_mongo():
