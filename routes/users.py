@@ -66,7 +66,7 @@ def verify_token():
             "name": g.token_data["name"],
             "role": g.token_data["role"]
         },
-        "token": g.token_data["token"]
+
     }), 200
 
 

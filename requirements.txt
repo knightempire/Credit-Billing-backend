@@ -7,6 +7,6 @@ bcrypt
 sendgrid
 requests
 supabase
-celery pymongo
+celery 
 pymongo[srv]
 dnspython

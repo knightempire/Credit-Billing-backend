@@ -31,7 +31,6 @@ def token_validator(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
         token = None
-
         if 'Authorization' in request.headers:
             token = request.headers['Authorization'].split(" ")[1]
 
@@ -40,7 +39,8 @@ def token_validator(func):
 
         try:
             decoded = jwt.decode(token, os.getenv("SECRET_KEY"), algorithms=["HS256"])
-            g.token_data = decoded  # ✅ Make sure this line exists
+            g.token_data = decoded
+            g.token_data["token"] = token  # <-- Add token string here
         except jwt.ExpiredSignatureError:
             return jsonify({"error": "Token has expired!"}), 401
         except jwt.InvalidTokenError:
@@ -48,6 +48,7 @@ def token_validator(func):
 
         return func(*args, **kwargs)
     return wrapper
+
 # Token verification for admin token
 
 def admintoken_validator(func):
