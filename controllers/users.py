@@ -5,7 +5,7 @@ from models import User
 from datetime import datetime, timedelta
 import bcrypt
 from middleware.mail.mail import send_register_email, send_forgot_email
-
+from middleware.auth.tokencreation import create_token
 
 # Get the mongo instance from the app
 def get_mongo():
@@ -35,7 +35,7 @@ def login_controller(request):
         "exp": expiration
     }
     
-    token = jwt.encode(payload, os.environ.get("JWT_SECRET"), algorithm="HS256")
+    token = create_token(payload) 
     
     return jsonify({
         "token": token,

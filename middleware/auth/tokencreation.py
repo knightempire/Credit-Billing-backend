@@ -1,3 +1,5 @@
+# middleware/auth/tokencreation.py
+
 import os
 import jwt
 from datetime import datetime, timedelta
@@ -6,7 +8,6 @@ from cryptography.hazmat.backends import default_backend
 from models.token import create_token_document, update_token_in_db
 import logging
 
-
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -14,10 +15,10 @@ load_dotenv()
 SECRET_KEY = os.getenv("SECRET_KEY")
 MAIL_SECRET_KEY = os.getenv("MAIL_SECRET_KEY")
 FORGOT_SECRET_KEY = os.getenv("FORGOT_SECRET_KEY")
-EXPIRES_IN = int(os.getenv("EXPIRES_IN", 3600)) 
+EXPIRES_IN = int(os.getenv("EXPIRES_IN", 3600))  # Default expiration of 1 hour
 MAIL_EXPIRES_IN = int(os.getenv("MAIL_EXPIRES_IN", 3600))  # Default expiration of 1 hour
 
-private_key_path = os.path.join(os.path.dirname(__file__), '../rsa/private_key.pem')
+private_key_path = os.path.join(os.path.dirname(__file__), '../../rsa/private_key.pem')
 
 def get_private_key():
     """Reads the private key from the PEM file."""
