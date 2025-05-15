@@ -16,7 +16,7 @@ def send_register_email(email, name, type):
 
         token_data = {'email': email, 'name': name}
         token = register_mail_token(token_data)
-        print(token)
+        print("token",token)
 
         verification_url = f"{os.getenv('STATIC_URL')}/password?token={token}#type=register"
 

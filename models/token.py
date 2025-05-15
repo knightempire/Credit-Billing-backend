@@ -1,5 +1,5 @@
 import os
-from datetime import datetime
+from datetime import datetime, timedelta
 from pymongo import MongoClient
 from dotenv import load_dotenv
 import logging
@@ -21,20 +21,33 @@ tokens_collection.create_index([("createdAt", 1)], expireAfterSeconds=300)
 
 def create_token_document(token, email):
     """Create a token document in MongoDB with expiration time."""
+    # Set the expiration time manually in the document for clarity
+    expiration_time = datetime.utcnow() + timedelta(seconds=MAIL_EXPIRES_IN)
+    
     new_token = {
         'token': token,
         'email': email,
-        'createdAt': datetime.utcnow()  # Add creation time
+        'createdAt': datetime.utcnow(),  # Add creation time
+        'expiresAt': expiration_time  # Add explicit expiration time field
     }
     result = tokens_collection.insert_one(new_token)
     return str(result.inserted_id)  # Return the inserted document's ID
 
-
 def update_token_in_db(token_id, token):
     """Update the stored token in the database."""
-    tokens_collection.update_one({'_id': token_id}, {'$set': {'token': token}})
-
+    expiration_time = datetime.utcnow() + timedelta(seconds=MAIL_EXPIRES_IN)
+    tokens_collection.update_one(
+        {'_id': token_id}, 
+        {'$set': {'token': token, 'expiresAt': expiration_time}}
+    )
 
 def get_token_by_email(email):
-    """Retrieve token by email from the database."""
-    return tokens_collection.find_one({"email": email})
+    """Retrieve token by email from the database and check expiration."""
+    token_document = tokens_collection.find_one({"email": email})
+    if token_document:
+        # Check if the token is expired manually
+        if token_document['expiresAt'] < datetime.utcnow():
+            logging.warning(f"Token for {email} has expired.")
+            return None  # Token is expired
+        return token_document
+    return None  # Token not found
