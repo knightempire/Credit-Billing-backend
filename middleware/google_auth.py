@@ -4,6 +4,7 @@ import requests
 from urllib.parse import urlencode
 from flask import redirect, url_for, session, request
 from models.user import User
+from middleware.auth.tokencreation import create_token
 
 def init_google_auth(app, mongo):
     """Initialize Google OAuth authentication"""
@@ -76,25 +77,26 @@ def init_google_auth(app, mongo):
         user_info = user_info_response.json()
 
         # Check if user exists by email
-        user = User.find_by_email(mongo, user_info['email'])
+        user = User.find_by_email(user_info['email'])
+
 
         # If not, create a new user
         if not user:
             # Create new user
             user = User.create_user(
-                mongo,
-                email=user_info['email'],
-                name=user_info['name']
+            email=user_info['email'],
+            name=user_info['name']
             )
 
-        # Generate JWT token
-        token = jwt.encode(
-            {"id": str(user['_id']), "name": user['name'], "email": user['email']},
-            os.environ.get("JWT_SECRET"),
-            algorithm="HS256",
-            headers={"exp": 3600}  # 1 hour expiration
-        )
 
+        # Generate JWT token
+        payload = {
+            "name": user['name'],
+            "email": user['email']
+        }
+
+        token = create_token(payload)
         # Redirect to client with token
         client_url = os.environ.get("CLIENT_URL")
         return redirect(f"{client_url}/auth/login?token={token}")
+
