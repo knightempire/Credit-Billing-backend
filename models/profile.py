@@ -60,3 +60,15 @@ class Profile:
     @staticmethod
     def delete_profile(email):
         return profiles_collection.delete_one({"email": email})
+
+    @staticmethod
+    def update_profile(email, update_data):
+        """Update profile fields (credit, images, payment)"""
+        result = profiles_collection.update_one(
+            {"email": email},
+            {"$set": update_data}
+        )
+
+        if result.modified_count:
+            return profiles_collection.find_one({"email": email})
+        return None
