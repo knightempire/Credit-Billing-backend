@@ -3,7 +3,7 @@ import jwt
 import requests
 from urllib.parse import urlencode
 from flask import redirect, url_for, session, request
-from models import User
+from models.user import User
 
 def init_google_auth(app, mongo):
     """Initialize Google OAuth authentication"""

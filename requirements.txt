@@ -1,0 +1,8 @@
+flask
+flask-cors
+flask-pymongo
+python-dotenv
+pyjwt
+bcrypt
+sendgrid
+requests

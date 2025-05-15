@@ -4,7 +4,7 @@ from flask import jsonify, current_app
 from models import User
 from datetime import datetime, timedelta
 import bcrypt
-from middleware.mail import send_register_email, send_forgot_email
+from middleware.mail.mail import send_register_email, send_forgot_email
 
 
 # Get the mongo instance from the app
@@ -67,7 +67,7 @@ def verify_token_controller(request):
         return jsonify({"message": "Invalid token"}), 401
 
 
-def register_user():
+def register_user(request):
     try:
         # Get data from the request body
         data = request.get_json()
@@ -103,7 +103,7 @@ def register_user():
         print(f'Error: {error}')
         return jsonify({'message': 'Internal server error'}), 500
     
-def create_user_and_password():
+def create_user_and_password(request):
     try:
         # Get data from the request body
         data = request.get_json()
@@ -153,7 +153,7 @@ def create_user_and_password():
         return jsonify({'message': 'Server error'}), 500
     
 
-def forgot_password():
+def forgot_password(request):
     try:
         data = request.get_json()
         email = data.get('email')

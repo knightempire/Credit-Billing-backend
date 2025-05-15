@@ -3,7 +3,7 @@ import sendgrid
 from sendgrid.helpers.mail import Mail, Email, To, Content
 from dotenv import load_dotenv
 from mail_temp import TEMPLATE_WELCOME_MAIL, TEMPLATE_RESET_MAIL, TEMPLATE_ADMIN_WELCOME_MAIL
-from auth.tokencreation import registermailtoken, forgotmailtoken
+from auth.tokencreation import register_mail_token, forgot_mail_token
 
 load_dotenv()  # Load environment variables
 
@@ -15,7 +15,7 @@ def send_register_email(email, name, type):
         print("send_register_email")
 
         token_data = {'email': email, 'name': name}
-        token = registermailtoken(token_data, type)
+        token = register_mail_token(token_data, type)
         print(token)
 
         verification_url = f"{os.getenv('STATIC_URL')}/password?token={token}#type=register"
@@ -51,7 +51,7 @@ def send_forgot_email(email, name):
         print("send_forgot_email")
 
         token_data = {'email': email, 'name': name}
-        token = forgotmailtoken(token_data)
+        token = forgot_mail_token(token_data)
         print(token)
 
         verification_url = f"{os.getenv('STATIC_URL')}/password?token={token}#type=forgot"
