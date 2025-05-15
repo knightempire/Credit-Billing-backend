@@ -107,7 +107,6 @@ def register_user(request):
     
 def create_user_and_password(request):
     try:
-        # Get data from the request body
         data = request.get_json()
         email = data.get('email')
         name = data.get('name')
@@ -115,32 +114,20 @@ def create_user_and_password(request):
 
         print(f"Received email: {email}, name: {name}")
 
-        # Check if both email and password are provided
         if not email or not password:
-            print('Missing email or password')
             return jsonify({'message': 'Email and password are required'}), 400
 
-        # Check if the user already exists in the database
-        print('Checking if email already exists')
-        existing_user = User.find_by_email(get_mongo(), email)
+        # No need to get mongo here since User uses module-level collection
+        existing_user = User.find_by_email(email)
         if existing_user:
-            print(f"Email already exists: {email}")
             return jsonify({'message': 'Email already exists'}), 400
 
-        # Hash the password before saving it
-        print(f"Hashing the password for {email}")
+        # Hash password manually OR just pass to create_user (which hashes)
+        # But to keep your code consistent, hash here and pass hashed
         hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
 
-        # Create a new user
-        print(f"Creating new user with email: {email}")
-        new_user = User.create_user(
-            get_mongo(),
-            email=email,
-            name=name,
-            password=hashed_password
-        )
+        new_user = User.create_user(email=email, name=name, password=hashed_password)
 
-        # Send success response
         return jsonify({
             'status': 200,
             'message': 'User created successfully',
@@ -153,7 +140,7 @@ def create_user_and_password(request):
     except Exception as error:
         print(f'Error in create_user_and_password: {error}')
         return jsonify({'message': 'Server error'}), 500
-    
+
 
 def forgot_password(request):
     try:
