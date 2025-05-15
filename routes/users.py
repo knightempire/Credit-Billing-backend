@@ -9,7 +9,7 @@ from controllers.profile import (
     delete_profile
 )
 from models.image_task import ImageTask
-from tasks.image_processing import process_image_task
+from tasks.image_processing import process_image_async
 from flask import g
 
 
@@ -91,6 +91,13 @@ def handle_delete_profile(email):
     return delete_profile(request, email)
 
 
+
+
+
+
+
+
+
 @users_bp.route("/image-task", methods=["POST"])
 @token_validator
 def submit_image_task():
@@ -102,6 +109,14 @@ def submit_image_task():
         return jsonify({"error": "Missing image data"}), 400
 
     task = ImageTask.create_task(email, image_data)
-    process_image_task.delay(task["_id"])  # Send to Celery
+    process_image_async(task["_id"])  # Launch async thread
 
-    return jsonify({"message": "Image processing started", "task": task}), 202
+    return jsonify({"message": "Image task started", "task_id": task["_id"]}), 202
+
+@users_bp.route("/image-task/<task_id>", methods=["GET"])
+@token_validator
+def get_task_status(task_id):
+    task = ImageTask.find_task(task_id)
+    if not task:
+        return jsonify({"error": "Task not found"}), 404
+    return jsonify(task), 200

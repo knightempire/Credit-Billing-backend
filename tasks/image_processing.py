@@ -1,19 +1,17 @@
-from celery_app import celery
-from models.image_task import ImageTask
-from bson import ObjectId
+import threading
 import time
+from models.image_task import ImageTask
 
-@celery.task()
-def process_image_task(task_id_str):
-    from models.image_task import db  # reimport for child process
-    task_id = ObjectId(task_id_str)
+def process_image_async(task_id):
+    def _task():
+        task = ImageTask.find_task(task_id)
+        if not task:
+            return
 
-    task = db.image_tasks.find_one({"_id": task_id})
-    if not task:
-        return
+        # Simulate image processing delay
+        time.sleep(20)
+        processed_data = task['image_data'] + "_processed"
 
-    # Mock processing
-    time.sleep(2)  # simulate processing delay
-    processed_image = task["image_data"] + "_processed"  # mock effect
+        ImageTask.update_status(task_id, "completed", result={"processed_data": processed_data})
 
-    ImageTask.update_status(task_id, "completed", result={"image": processed_image})
+    threading.Thread(target=_task).start()

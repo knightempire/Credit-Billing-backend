@@ -28,29 +28,26 @@ FORGOT_SECRET_KEY = os.getenv("FORGOT_SECRET_KEY")
 # JWT Token verification for general token
 
 def token_validator(func):
-    @wraps(func)  # ← THIS IS CRUCIAL
+    @wraps(func)
     def wrapper(*args, **kwargs):
-        token_header = request.headers.get('Authorization')
-        token = token_header.split(' ')[1] if token_header else None
+        token = None
+
+        if 'Authorization' in request.headers:
+            token = request.headers['Authorization'].split(" ")[1]
 
         if not token:
-            return jsonify({'MESSAGE': 'Missing or invalid token.'}), 401
+            return jsonify({"error": "Token is missing!"}), 401
 
         try:
-            payload = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
-            g.user = {
-                "email": payload.get("email"),
-                "name": payload.get("name"),
-                "role": payload.get("role")
-            }
-            return func(*args, **kwargs)
+            decoded = jwt.decode(token, os.getenv("SECRET_KEY"), algorithms=["HS256"])
+            g.token_data = decoded  # ✅ Make sure this line exists
         except jwt.ExpiredSignatureError:
-            return jsonify({'MESSAGE': 'Token has expired.'}), 401
-        except jwt.InvalidTokenError as e:
-            return jsonify({'MESSAGE': f'Invalid token: {str(e)}'}), 401
+            return jsonify({"error": "Token has expired!"}), 401
+        except jwt.InvalidTokenError:
+            return jsonify({"error": "Invalid token!"}), 401
 
+        return func(*args, **kwargs)
     return wrapper
-
 # Token verification for admin token
 
 def admintoken_validator(func):

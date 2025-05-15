@@ -23,10 +23,19 @@ class ImageTask:
 
     @staticmethod
     def update_status(task_id, status, result=None):
+        from bson import ObjectId
         update_fields = {"status": status}
         if result:
             update_fields["result"] = result
         image_tasks_collection.update_one(
-            {"_id": task_id},
+            {"_id": ObjectId(task_id)},
             {"$set": update_fields}
         )
+
+    @staticmethod
+    def find_task(task_id):
+        from bson import ObjectId
+        task = image_tasks_collection.find_one({"_id": ObjectId(task_id)})
+        if task:
+            task["_id"] = str(task["_id"])
+        return task
