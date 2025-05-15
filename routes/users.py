@@ -9,9 +9,6 @@ users_bp = Blueprint('users', __name__)
 def login():
     return login_controller(request)
 
-@users_bp.route('/verify-token', methods=['GET'])
-def verify_token():
-    return verify_token_controller(request)
 
 
 @users_bp.route('/register', methods=['POST'])
@@ -28,12 +25,36 @@ def create_user():
 @readverify_register_tokens
 def verify_register_token_route():
     # Your logic here (or just return success if decorator passes)
-    return jsonify({'message': 'Token verified successfully'})
+        return jsonify({
+        "message": "Token verified successfully",
+        "user": {
+            "email": g.token_data["email"],
+            "name": g.token_data["name"],
+        },
+    }), 200
+
 
 @users_bp.route('/verify-forgot-token', methods=['GET'])
 @readverify_forgot_token
 def verify_forgot_route():
-    # Your logic here (or just return success if decorator passes)
-    return jsonify({'message': 'Token verified successfully'})
+        return jsonify({
+        "message": "Token verified successfully",
+        "user": {
+            "email": g.token_data["email"],
+            "name": g.token_data["name"],
+        },
+    }), 200
 
 
+@users_bp.route('/verify-token', methods=['GET'])
+@token_validator
+def verify_token():
+    return jsonify({
+        "message": "Token verified successfully",
+        "user": {
+            "email": g.token_data["email"],
+            "name": g.token_data["name"],
+            "role": g.token_data["role"]
+        },
+        "token": g.token_data["token"]
+    }), 200

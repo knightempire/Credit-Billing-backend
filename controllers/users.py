@@ -14,29 +14,35 @@ def get_mongo():
 def login_controller(request):
     """Handle user login"""
     data = request.get_json()
-    email = data.get('username')
+    email = data.get('email')
     password = data.get('password')
-    
-    mongo = get_mongo()
-    user = User.find_by_email(mongo, email)
-    
+
+    user = User.find_by_email(email)
+    print(f'User found: {user}')  # Debugging info
+
     if not user or 'password' not in user:
         return jsonify({"message": "Invalid credentials"}), 401
-    
+
+    # Debug prints
+    print("Entered password:", password)
+    print("Stored hash:", user['password'])
+    print("Password match:", User.compare_password(password, user['password']))
+
     if not User.compare_password(password, user['password']):
-        return jsonify({"message": "Invalid credentials"}), 401
-    
+        return jsonify({"message": "Invalid password"}), 401
+
     # Generate JWT token
-    expiration = datetime.utcnow() + timedelta(hours=1)  # Token expiration time
+    expiration = datetime.utcnow() + timedelta(hours=1)
     payload = {
         "id": str(user['_id']),
         "name": user['name'],
         "email": user['email'],
+        "role": user.get('role', 'user'),
         "exp": expiration
     }
-    
-    token = create_token(payload) 
-    
+
+    token = create_token(payload)
+
     return jsonify({
         "token": token,
         "user": {"name": user['name'], "email": user['email']}
@@ -112,7 +118,7 @@ def create_user_and_password(request):
         name = data.get('name')
         password = data.get('password')
 
-        print(f"Received email: {email}, name: {name}")
+        print(f"Received email: {email}, name: {name}", f"password: {password}")
 
         if not email or not password:
             return jsonify({'message': 'Email and password are required'}), 400

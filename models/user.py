@@ -3,6 +3,7 @@ from bson.objectid import ObjectId
 from datetime import datetime
 from pymongo import MongoClient
 import os
+import base64
 
 # Load environment variables
 from dotenv import load_dotenv
@@ -28,7 +29,9 @@ class User:
         
         # Hash password if provided
         if password:
-            user["password"] = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+            
+            generated_hash = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
+            user["password"] = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
         
         result = users_collection.insert_one(user)
         user['_id'] = result.inserted_id
@@ -46,9 +49,21 @@ class User:
     
     @staticmethod
     def compare_password(plain_password, hashed_password):
-        """Compare a plain password with a hashed password"""
-        return bcrypt.checkpw(plain_password.encode('utf-8'), hashed_password.encode('utf-8'))
-    
+        try:
+            print("Entered password (raw):", plain_password)
+            print("Stored bcrypt hash:", hashed_password)
+
+            hashed_password = hashed_password.encode('utf-8')
+
+            plain_password_bytes = plain_password.encode('utf-8')
+            match = bcrypt.checkpw(plain_password_bytes, hashed_password)
+
+            print("Password match result:", match)
+            return match
+        except Exception as e:
+            print("Error comparing passwords:", e)
+            return False
+
     @staticmethod
     def update_user(user_id, updated_data):
         """Update user data (e.g., name, role, etc.)"""
