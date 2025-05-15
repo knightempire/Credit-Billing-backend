@@ -1,7 +1,7 @@
 import jwt
 import os
 from flask import jsonify, current_app
-from models import User
+from models.user import User
 from datetime import datetime, timedelta
 import bcrypt
 from middleware.mail.mail import send_register_email, send_forgot_email
@@ -85,6 +85,7 @@ def register_user(request):
         # Check if email already exists in the database
         print('Checking if email already exists')
         existing_user = User.find_by_email(email)
+        print(f'Existing user: {existing_user}')
         if existing_user:
             print(f'email already exists: {email}')
             return jsonify({'message': 'email already exists'}), 400
@@ -102,6 +103,7 @@ def register_user(request):
     except Exception as error:
         print(f'Error: {error}')
         return jsonify({'message': 'Internal server error'}), 500
+
     
 def create_user_and_password(request):
     try:

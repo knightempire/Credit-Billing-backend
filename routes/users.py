@@ -15,8 +15,8 @@ def verify_token():
 
 @users_bp.route('/register', methods=['POST'])
 def register():
-    return register_user()
+    return register_user(request)
 
 @users_bp.route('/create_user', methods=['POST'])
 def create_user():
-    return create_user_and_password()
+    return create_user_and_password(request)
